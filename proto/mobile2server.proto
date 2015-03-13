@@ -10,6 +10,7 @@ service greeter{
 	rpc Spliti(Request) returns (stream sReply){}
 	rpc Cat(stream sRequest) returns (Reply){}
 	rpc Transmit(stream sRequest) returns (stream sReply){}
+	rpc Forwarding(Request) returns (stream sReply){}
 }
 
 

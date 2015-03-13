@@ -14,6 +14,7 @@ import static io.grpc.stub.ServerCalls.asyncStreamingRequestCall;
 
 import java.io.IOException;
 
+
 public class greeterGrpc {
 
   private static final io.grpc.stub.Method<io.grpc.examples.mobilegrpc.Mobile2Server.Request,
@@ -88,6 +89,24 @@ public class greeterGrpc {
                       return io.grpc.examples.mobilegrpc.Mobile2Server.sReply.parseFrom(input);
                   }
           }));
+  private static final io.grpc.stub.Method<io.grpc.examples.mobilegrpc.Mobile2Server.Request,
+      io.grpc.examples.mobilegrpc.Mobile2Server.sReply> METHOD_FORWARDING =
+      io.grpc.stub.Method.create(
+          io.grpc.MethodType.SERVER_STREAMING, "Forwarding",
+          io.grpc.nano.NanoUtils.<io.grpc.examples.mobilegrpc.Mobile2Server.Request>marshaller(
+              new io.grpc.nano.Parser<io.grpc.examples.mobilegrpc.Mobile2Server.Request>() {
+                  @Override
+                  public io.grpc.examples.mobilegrpc.Mobile2Server.Request parse(com.google.protobuf.nano.CodedInputByteBufferNano input) throws IOException {
+                      return io.grpc.examples.mobilegrpc.Mobile2Server.Request.parseFrom(input);
+                  }
+          }),
+          io.grpc.nano.NanoUtils.<io.grpc.examples.mobilegrpc.Mobile2Server.sReply>marshaller(
+              new io.grpc.nano.Parser<io.grpc.examples.mobilegrpc.Mobile2Server.sReply>() {
+                  @Override
+                  public io.grpc.examples.mobilegrpc.Mobile2Server.sReply parse(com.google.protobuf.nano.CodedInputByteBufferNano input) throws IOException {
+                      return io.grpc.examples.mobilegrpc.Mobile2Server.sReply.parseFrom(input);
+                  }
+          }));
 
   public static greeterStub newStub(io.grpc.Channel channel) {
     return new greeterStub(channel, CONFIG);
@@ -117,6 +136,8 @@ public class greeterGrpc {
         io.grpc.examples.mobilegrpc.Mobile2Server.Reply> cat;
     public final io.grpc.MethodDescriptor<io.grpc.examples.mobilegrpc.Mobile2Server.sRequest,
         io.grpc.examples.mobilegrpc.Mobile2Server.sReply> transmit;
+    public final io.grpc.MethodDescriptor<io.grpc.examples.mobilegrpc.Mobile2Server.Request,
+        io.grpc.examples.mobilegrpc.Mobile2Server.sReply> forwarding;
 
     private greeterServiceDescriptor() {
       sayHello = createMethodDescriptor(
@@ -127,6 +148,8 @@ public class greeterGrpc {
           "mobile2server.greeter", METHOD_CAT);
       transmit = createMethodDescriptor(
           "mobile2server.greeter", METHOD_TRANSMIT);
+      forwarding = createMethodDescriptor(
+          "mobile2server.greeter", METHOD_FORWARDING);
     }
 
     @SuppressWarnings("unchecked")
@@ -144,6 +167,9 @@ public class greeterGrpc {
       transmit = (io.grpc.MethodDescriptor<io.grpc.examples.mobilegrpc.Mobile2Server.sRequest,
           io.grpc.examples.mobilegrpc.Mobile2Server.sReply>) methodMap.get(
           CONFIG.transmit.getName());
+      forwarding = (io.grpc.MethodDescriptor<io.grpc.examples.mobilegrpc.Mobile2Server.Request,
+          io.grpc.examples.mobilegrpc.Mobile2Server.sReply>) methodMap.get(
+          CONFIG.forwarding.getName());
     }
 
     @java.lang.Override
@@ -158,7 +184,8 @@ public class greeterGrpc {
           sayHello,
           spliti,
           cat,
-          transmit);
+          transmit,
+          forwarding);
     }
   }
 
@@ -175,6 +202,9 @@ public class greeterGrpc {
 
     public io.grpc.stub.StreamObserver<io.grpc.examples.mobilegrpc.Mobile2Server.sRequest> transmit(
         io.grpc.stub.StreamObserver<io.grpc.examples.mobilegrpc.Mobile2Server.sReply> responseObserver);
+
+    public void forwarding(io.grpc.examples.mobilegrpc.Mobile2Server.Request request,
+        io.grpc.stub.StreamObserver<io.grpc.examples.mobilegrpc.Mobile2Server.sReply> responseObserver);
   }
 
   public static interface greeterBlockingClient {
@@ -182,6 +212,9 @@ public class greeterGrpc {
     public io.grpc.examples.mobilegrpc.Mobile2Server.Reply sayHello(io.grpc.examples.mobilegrpc.Mobile2Server.Request request);
 
     public java.util.Iterator<io.grpc.examples.mobilegrpc.Mobile2Server.sReply> spliti(
+        io.grpc.examples.mobilegrpc.Mobile2Server.Request request);
+
+    public java.util.Iterator<io.grpc.examples.mobilegrpc.Mobile2Server.sReply> forwarding(
         io.grpc.examples.mobilegrpc.Mobile2Server.Request request);
   }
 
@@ -232,6 +265,13 @@ public class greeterGrpc {
       return duplexStreamingCall(
           channel.newCall(config.transmit), responseObserver);
     }
+
+    @java.lang.Override
+    public void forwarding(io.grpc.examples.mobilegrpc.Mobile2Server.Request request,
+        io.grpc.stub.StreamObserver<io.grpc.examples.mobilegrpc.Mobile2Server.sReply> responseObserver) {
+      asyncServerStreamingCall(
+          channel.newCall(config.forwarding), request, responseObserver);
+    }
   }
 
   public static class greeterBlockingStub extends
@@ -259,6 +299,13 @@ public class greeterGrpc {
         io.grpc.examples.mobilegrpc.Mobile2Server.Request request) {
       return blockingServerStreamingCall(
           channel.newCall(config.spliti), request);
+    }
+
+    @java.lang.Override
+    public java.util.Iterator<io.grpc.examples.mobilegrpc.Mobile2Server.sReply> forwarding(
+        io.grpc.examples.mobilegrpc.Mobile2Server.Request request) {
+      return blockingServerStreamingCall(
+          channel.newCall(config.forwarding), request);
     }
   }
 
@@ -335,6 +382,19 @@ public class greeterGrpc {
               public io.grpc.stub.StreamObserver<io.grpc.examples.mobilegrpc.Mobile2Server.sRequest> invoke(
                   io.grpc.stub.StreamObserver<io.grpc.examples.mobilegrpc.Mobile2Server.sReply> responseObserver) {
                 return serviceImpl.transmit(responseObserver);
+              }
+            })))
+      .addMethod(createMethodDefinition(
+          METHOD_FORWARDING,
+          asyncUnaryRequestCall(
+            new io.grpc.stub.ServerCalls.UnaryRequestMethod<
+                io.grpc.examples.mobilegrpc.Mobile2Server.Request,
+                io.grpc.examples.mobilegrpc.Mobile2Server.sReply>() {
+              @java.lang.Override
+              public void invoke(
+                  io.grpc.examples.mobilegrpc.Mobile2Server.Request request,
+                  io.grpc.stub.StreamObserver<io.grpc.examples.mobilegrpc.Mobile2Server.sReply> responseObserver) {
+                serviceImpl.forwarding(request, responseObserver);
               }
             }))).build();
   }

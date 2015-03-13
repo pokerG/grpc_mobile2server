@@ -24,6 +24,7 @@ var (
 )
 
 type Server struct {
+	mem map[int]string
 }
 
 func (s *Server) SayHello(ctx context.Context, from *pb.Request) (*pb.Reply, error) {
@@ -33,6 +34,7 @@ func (s *Server) SayHello(ctx context.Context, from *pb.Request) (*pb.Reply, err
 func (s *Server) Spliti(from *pb.Request, stream pb.Greeter_SplitiServer) error {
 	sub := strings.Split(from.Value, ";")
 	for k, v := range sub {
+		s.mem[k] = v
 		if err := stream.Send(&pb.SReply{Id: int32(k), Value: v}); err != nil {
 			return err
 		}
@@ -71,6 +73,16 @@ func (s *Server) Transmit(stream pb.Greeter_TransmitServer) error {
 		}
 	}
 }
+func (s *Server) Forwarding(from *pb.Request, stream pb.Greeter_ForwardingServer) error {
+	if from.Value == "get" {
+		for k, v := range s.mem {
+			if err := stream.Send(&pb.SReply{Id: int32(k), Value: v}); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
 func main() {
 	flag.Parse()
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
@@ -78,6 +90,6 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	grpcServer := grpc.NewServer()
-	pb.RegisterGreeterServer(grpcServer, &Server{})
+	pb.RegisterGreeterServer(grpcServer, &Server{mem: make(map[int]string)})
 	grpcServer.Serve(lis)
 }

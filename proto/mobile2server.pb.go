@@ -74,6 +74,7 @@ type GreeterClient interface {
 	Spliti(ctx context.Context, in *Request, opts ...grpc.CallOption) (Greeter_SplitiClient, error)
 	Cat(ctx context.Context, opts ...grpc.CallOption) (Greeter_CatClient, error)
 	Transmit(ctx context.Context, opts ...grpc.CallOption) (Greeter_TransmitClient, error)
+	Forwarding(ctx context.Context, in *Request, opts ...grpc.CallOption) (Greeter_ForwardingClient, error)
 }
 
 type greeterClient struct {
@@ -190,6 +191,38 @@ func (x *greeterTransmitClient) Recv() (*SReply, error) {
 	return m, nil
 }
 
+func (c *greeterClient) Forwarding(ctx context.Context, in *Request, opts ...grpc.CallOption) (Greeter_ForwardingClient, error) {
+	stream, err := grpc.NewClientStream(ctx, &_Greeter_serviceDesc.Streams[3], c.cc, "/mobile2server.greeter/Forwarding", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &greeterForwardingClient{stream}
+	if err := x.ClientStream.SendProto(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Greeter_ForwardingClient interface {
+	Recv() (*SReply, error)
+	grpc.ClientStream
+}
+
+type greeterForwardingClient struct {
+	grpc.ClientStream
+}
+
+func (x *greeterForwardingClient) Recv() (*SReply, error) {
+	m := new(SReply)
+	if err := x.ClientStream.RecvProto(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // Server API for Greeter service
 
 type GreeterServer interface {
@@ -197,6 +230,7 @@ type GreeterServer interface {
 	Spliti(*Request, Greeter_SplitiServer) error
 	Cat(Greeter_CatServer) error
 	Transmit(Greeter_TransmitServer) error
+	Forwarding(*Request, Greeter_ForwardingServer) error
 }
 
 func RegisterGreeterServer(s *grpc.Server, srv GreeterServer) {
@@ -288,6 +322,27 @@ func (x *greeterTransmitServer) Recv() (*SRequest, error) {
 	return m, nil
 }
 
+func _Greeter_Forwarding_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Request)
+	if err := stream.RecvProto(m); err != nil {
+		return err
+	}
+	return srv.(GreeterServer).Forwarding(m, &greeterForwardingServer{stream})
+}
+
+type Greeter_ForwardingServer interface {
+	Send(*SReply) error
+	grpc.ServerStream
+}
+
+type greeterForwardingServer struct {
+	grpc.ServerStream
+}
+
+func (x *greeterForwardingServer) Send(m *SReply) error {
+	return x.ServerStream.SendProto(m)
+}
+
 var _Greeter_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "mobile2server.greeter",
 	HandlerType: (*GreeterServer)(nil),
@@ -313,6 +368,11 @@ var _Greeter_serviceDesc = grpc.ServiceDesc{
 			Handler:       _Greeter_Transmit_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
+		},
+		{
+			StreamName:    "Forwarding",
+			Handler:       _Greeter_Forwarding_Handler,
+			ServerStreams: true,
 		},
 	},
 }
