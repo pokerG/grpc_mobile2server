@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+
+option java_package = "io.grpc.examples.mobilegrpc";
+
+package mobile2server;
+
+service greeter{
+	rpc SayHello(Request) returns (Reply){}
+	rpc Spliti(Request) returns (stream sReply){}
+	rpc Cat(stream sRequest) returns (Reply){}
+	rpc Transmit(stream sRequest) returns (stream sReply){}
+}
+
+
+message Request{
+	string value = 1;
+}
+
+message Reply{
+	string value = 1;
+}
+
+message sRequest{
+	int32 id = 1;
+	string value = 2;
+}
+
+message sReply{
+	int32 id = 1;
+	string value = 2;
+}
+
